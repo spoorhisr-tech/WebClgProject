@@ -11,6 +11,11 @@ function App() {
   const [isRecovery, setIsRecovery] = useState(false)
 
   useEffect(() => {
+    // Check if we are in a recovery flow on mount
+    if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
+      setIsRecovery(true)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
     })

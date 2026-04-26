@@ -19,7 +19,7 @@ const Auth = ({ onRecoveryComplete }) => {
     // Listen for the session to be established from the URL hash
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event)
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || window.location.hash.includes('type=recovery')) {
         setIsResetting(true)
       }
     })

@@ -8,10 +8,30 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isResetting, setIsResetting] = useState(window.location.hash.includes('type=recovery') || window.location.hash.includes('reset-password'))
+  const [isResetting, setIsResetting] = useState(false)
+
+  React.useEffect(() => {
+    // Check if we are in a reset flow
+    if (window.location.hash.includes('type=recovery') || window.location.hash.includes('reset-password')) {
+      setIsResetting(true)
+    }
+
+    // Listen for the session to be established from the URL hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsResetting(true)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault()
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -20,8 +40,9 @@ const Auth = () => {
       alert('Password updated successfully! You can now sign in.')
       setIsResetting(false)
       window.location.hash = ''
+      window.location.reload() // Reload to clear the session/hash completely
     } catch (err) {
-      setError(err.message)
+      setError(err.message === 'Auth session missing!' ? 'Session expired. Please request a new reset link.' : err.message)
     } finally {
       setLoading(false)
     }

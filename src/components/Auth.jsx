@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { Loader2, Mail, Lock, UserPlus, LogIn, ShieldCheck } from 'lucide-react'
 
-const Auth = () => {
+const Auth = ({ onRecoveryComplete }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [isSignUp, setIsSignUp] = useState(false)
@@ -11,13 +11,14 @@ const Auth = () => {
   const [isResetting, setIsResetting] = useState(false)
 
   React.useEffect(() => {
-    // Check if we are in a reset flow
-    if (window.location.hash.includes('type=recovery') || window.location.hash.includes('reset-password')) {
+    // Check if we are in a reset flow via URL hash
+    if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
       setIsResetting(true)
     }
 
     // Listen for the session to be established from the URL hash
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event)
       if (event === 'PASSWORD_RECOVERY') {
         setIsResetting(true)
       }
@@ -39,8 +40,8 @@ const Auth = () => {
       if (error) throw error
       alert('Password updated successfully! You can now sign in.')
       setIsResetting(false)
+      if (onRecoveryComplete) onRecoveryComplete()
       window.location.hash = ''
-      window.location.reload() // Reload to clear the session/hash completely
     } catch (err) {
       setError(err.message === 'Auth session missing!' ? 'Session expired. Please request a new reset link.' : err.message)
     } finally {
@@ -123,7 +124,7 @@ const Auth = () => {
     setError(null)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/WebClgProject/#reset-password',
+        redirectTo: window.location.origin + '/WebClgProject/',
       })
       if (error) throw error
       alert('Password reset link has been sent to your email!')

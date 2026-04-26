@@ -8,6 +8,7 @@ import './App.css'
 
 function App() {
   const [session, setSession] = useState(null)
+  const [isRecovery, setIsRecovery] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -16,8 +17,11 @@ function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsRecovery(true)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -25,9 +29,10 @@ function App() {
 
   const handleSignOut = () => {
     supabase.auth.signOut()
+    setIsRecovery(false)
   }
 
-  if (!session) {
+  if (!session || isRecovery) {
     return (
       <div className="app-wrapper">
         <header className="header glass-panel">
@@ -35,7 +40,7 @@ function App() {
             <div className="logo">Drive<span>Sync</span></div>
           </nav>
         </header>
-        <Auth />
+        <Auth onRecoveryComplete={() => setIsRecovery(false)} />
       </div>
     )
   }

@@ -8,6 +8,24 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isResetting, setIsResetting] = useState(window.location.hash.includes('type=recovery') || window.location.hash.includes('reset-password'))
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) throw error
+      alert('Password updated successfully! You can now sign in.')
+      setIsResetting(false)
+      window.location.hash = ''
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleAuth = async (e) => {
     e.preventDefault()
@@ -84,7 +102,7 @@ const Auth = () => {
     setError(null)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password',
+        redirectTo: window.location.origin + '/WebClgProject/#reset-password',
       })
       if (error) throw error
       alert('Password reset link has been sent to your email!')
@@ -125,33 +143,51 @@ const Auth = () => {
         <span>or use email</span>
       </div>
 
-      <form onSubmit={handleAuth} className="auth-form">
-        <div className="form-group">
-          <label><Mail className="field-icon" /> Email Address</label>
-          <input 
-            type="email" 
-            placeholder="you@example.com" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required 
-          />
-        </div>
+      {isResetting ? (
+        <form onSubmit={handleUpdatePassword} className="auth-form">
+          <div className="form-group">
+            <label><Lock className="field-icon" /> New Password</label>
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
+            />
+          </div>
+          <button type="submit" className="btn-primary auth-btn" disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" /> : 'Update Password'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleAuth} className="auth-form">
+          <div className="form-group">
+            <label><Mail className="field-icon" /> Email Address</label>
+            <input 
+              type="email" 
+              placeholder="you@example.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required 
+            />
+          </div>
 
-        <div className="form-group">
-          <label><Lock className="field-icon" /> Password</label>
-          <input 
-            type="password" 
-            placeholder="••••••••" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required 
-          />
-        </div>
+          <div className="form-group">
+            <label><Lock className="field-icon" /> Password</label>
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
+            />
+          </div>
 
-        <button type="submit" className="btn-primary auth-btn" disabled={loading}>
-          {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? 'Sign Up' : 'Sign In')}
-        </button>
-      </form>
+          <button type="submit" className="btn-primary auth-btn" disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? 'Sign Up' : 'Sign In')}
+          </button>
+        </form>
+      )}
 
       <div className="auth-footer">
         {isSignUp ? (

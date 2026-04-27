@@ -6,6 +6,8 @@ const BookingList = (props) => {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const ADMIN_EMAIL = 'admin@drivesync.com'; // You can change this to your email
+
   useEffect(() => {
     fetchBookings()
 
@@ -26,11 +28,19 @@ const BookingList = (props) => {
 
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
+      const isAdmin = props.user.email === ADMIN_EMAIL;
+      
+      let query = supabase
         .from('bookings')
         .select('*')
-        .eq('user_id', props.user.id)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      // If not admin, only show own bookings
+      if (!isAdmin) {
+        query = query.eq('user_id', props.user.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error
       setBookings(data || [])

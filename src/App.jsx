@@ -58,7 +58,13 @@ function App() {
             Drive<span>Sync</span>
           </div>
           <div className="nav-links">
-            <span className="user-email">{session.user.email}</span>
+            <span className="user-email">
+              {session.user.email === 'admin@drivesync.com' ? (
+                <span className="admin-badge">System Admin</span>
+              ) : (
+                session.user.email
+              )}
+            </span>
             <button onClick={handleSignOut} className="btn-icon">
               <LogOut size={18} />
             </button>
@@ -115,6 +121,15 @@ function App() {
 
       <style>{`
         .user-email { font-size: 0.875rem; color: var(--text-muted); }
+        .admin-badge { 
+          background: rgba(14, 165, 233, 0.15); 
+          color: #38bdf8; 
+          padding: 0.25rem 0.75rem; 
+          border-radius: 9999px; 
+          font-weight: 600; 
+          font-size: 0.75rem;
+          border: 1px solid rgba(14, 165, 233, 0.3);
+        }
         .btn-icon { background: none; color: var(--text-muted); display: flex; align-items: center; }
         .btn-icon:hover { color: var(--text-main); }
       `}</style>

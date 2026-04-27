@@ -6,7 +6,7 @@ const BookingList = (props) => {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const ADMIN_EMAIL = 'admin@drivesync.com'; // You can change this to your email
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@drivesync.com';
 
   useEffect(() => {
     fetchBookings()

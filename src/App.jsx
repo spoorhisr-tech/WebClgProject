@@ -59,7 +59,7 @@ function App() {
           </div>
           <div className="nav-links">
             <span className="user-email">
-              {session.user.email === 'admin@drivesync.com' ? (
+              {session.user.email === (import.meta.env.VITE_ADMIN_EMAIL || 'admin@drivesync.com') ? (
                 <span className="admin-badge">System Admin</span>
               ) : (
                 session.user.email

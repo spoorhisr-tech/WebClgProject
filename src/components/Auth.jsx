@@ -124,7 +124,7 @@ const Auth = ({ onRecoveryComplete }) => {
     setError(null)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/WebClgProject/',
+        redirectTo: window.location.origin + '/',
       })
       if (error) throw error
       alert('Password reset link has been sent to your email!')
